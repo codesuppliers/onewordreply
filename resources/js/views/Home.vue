@@ -15,7 +15,9 @@
       </div>
     </div>
     <div class="w-full flex justify-center mb-8" v-if="!isEndOfQuestions">
-      <span class="flex justify-center btn-one-end">Scroll for more!</span>
+      <span class="flex justify-center btn-one-scrollfor"
+        >Scroll for more!</span
+      >
     </div>
     <div class="w-full flex justify-center mb-8" v-if="isEndOfQuestions">
       <Button type="end" :onClick="scrollTop">That's All Folks!</Button>
@@ -37,11 +39,11 @@ export default {
   data() {
     return {
       questions: [],
-      scrollCount: 0,
       scrollListener: null,
-      isEndOfQuestions: true,
+      isEndOfQuestions: false,
       openedId: null,
       replies: [],
+      nextUrl: null,
     };
   },
   methods: {
@@ -53,24 +55,32 @@ export default {
         window.innerHeight + window.pageYOffset >= document.body.offsetHeight;
 
       if (endOfPage) {
-        this.scrollCount++;
-        API.getQuestions(this.scrollCount)
-          .then((response) => {
-            this.questions = this.questions.concat(response.data);
-            this.isEndOfQuestions = false;
-          })
-          .catch((error) => {
-            this.scrollCount--;
-            this.isEndOfQuestions = true;
-          });
+        if (this.nextUrl) {
+          API.getQuestions(this.nextUrl)
+            .then((response) => {
+              this.questions = this.questions.concat(response.data.data);
+              this.nextUrl = response.data.links.next;
+              this.isEndOfQuestions = false;
+            })
+            .catch((error) => {
+              this.isEndOfQuestions = true;
+            });
+        } else {
+          console.log('end of page');
+          this.isEndOfQuestions = true;
+        }
       }
     },
     loadReplies(questionId) {
       API.getReplies(questionId)
         .then((response) => {
-          console.log(response.data);
-          this.openedId = questionId;
-          this.replies = this.listToTree(response.data);
+          if (this.openedId === questionId) {
+            this.openedId = null;
+            this.replies = [];
+          } else {
+            this.openedId = questionId;
+            this.replies = this.listToTree(response.data.data);
+          }
         })
         .catch((error) => {
           console.log(error);
@@ -79,7 +89,7 @@ export default {
     listToTree(data, options) {
       options = options || {};
       var ID_KEY = options.idKey || 'id';
-      var PARENT_KEY = options.parentKey || 'replyParent';
+      var PARENT_KEY = options.parentKey || 'reply_parent';
       var CHILDREN_KEY = options.childrenKey || 'Items';
 
       var item, id, parentId;
@@ -105,18 +115,20 @@ export default {
     },
   },
   created() {
-    this.scrollCount++;
-    API.getQuestions(this.scrollCount)
+    API.getQuestions('/api/questions')
       .then((response) => {
-        this.questions = this.questions.concat(response.data);
+        this.questions = this.questions.concat(response.data.data);
+        this.nextUrl = response.data.links.next;
+
+        this.scrollListener = window.addEventListener(
+          'scroll',
+          this.isEndOfPage
+        );
+        this.isEndOfPage();
       })
       .catch((error) => {
         this.isEndOfQuestions = true;
       });
-
-    this.scrollListener = window.addEventListener('scroll', this.isEndOfPage);
-
-    this.isEndOfPage();
   },
   beforeDestroy() {
     window.removeEventListener('scroll', this.isEndOfPage);

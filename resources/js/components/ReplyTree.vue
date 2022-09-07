@@ -1,24 +1,22 @@
 <template>
   <div
     class="flex flex-col pl-4"
-    :class="
-      reply.replyParent !== null
-        ? 'border-l-2 border-one-gray ' + bgColorFlipped
-        : bgColorFlipped
-    "
+    :class="reply.reply_parent !== null ? 'border-l-2 border-one-gray ' : ''"
   >
     <div
       class="flex text-one-gray space-x-2"
-      :class="reply.replyParent !== null ? 'pt-4' : ''"
+      :class="reply.reply_parent !== null ? 'pt-4' : ''"
     >
-      <span class="font-bold text-sm text-one-secondary">{{ reply.name }}</span>
+      <span class="font-bold text-sm text-one-secondary">{{
+        reply.username
+      }}</span>
       <span class="text-xs">•</span>
-      <span class="text-sm">{{ reply.when }}</span>
+      <span class="text-sm">{{ reply.created_at }}</span>
       <!-- <span class="text-xs">•</span> -->
     </div>
 
     <div class="pl-2 w-full border-l-2 border-one-gray mt-2 text-sm">
-      <span>{{ reply.reply }}</span>
+      <span>{{ reply.content }}</span>
       <Button
         type="reply"
         lIcon="IconReply"
@@ -65,12 +63,7 @@ export default {
     },
   },
   data() {
-    return {
-      bgColorFlipped:
-        this.bgColor === 'bg-one-primary'
-          ? 'bg-one-primaryDark'
-          : 'bg-one-primary',
-    };
+    return {};
   },
   methods: {
     writeReply(id) {},

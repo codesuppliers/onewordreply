@@ -5,12 +5,20 @@
     @click="onClick(value)"
   >
     <div class="flex">
-      <span class="font-bold grow">{{ question.question }}</span>
-      <span class="text-sm font-bold">#{{ question.id }}</span>
+      <div class="flex flex-col grow">
+        <span class="font-bold grow">{{ question.content }}</span>
+        <span class="text-sm" :class="opened ? 'mb-4' : ''">{{
+          question.description
+        }}</span>
+      </div>
+
+      <div class="flex flex-col items-end">
+        <span class="text-xs font-bold text-one-secondary">{{
+          question.username
+        }}</span>
+        <span class="text-xs font-bold">#{{ question.id }}</span>
+      </div>
     </div>
-    <span class="text-sm" :class="opened ? 'mb-4' : ''">{{
-      question.description
-    }}</span>
     <div class="flex flex-col" v-if="opened">
       <ReplyTree
         v-for="reply in replies"
@@ -18,6 +26,7 @@
         :reply="reply"
         :bgColor="bgColor"
         class="p-4 rounded-lg mb-4"
+        :class="bgColorFlipped"
       />
     </div>
   </div>
@@ -56,6 +65,14 @@ export default {
   },
   components: {
     ReplyTree,
+  },
+  data() {
+    return {
+      bgColorFlipped:
+        this.bgColor === 'bg-one-primary'
+          ? 'bg-one-primaryDark'
+          : 'bg-one-primary',
+    };
   },
 };
 </script>
