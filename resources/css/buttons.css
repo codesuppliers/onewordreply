@@ -7,7 +7,7 @@
 }
 
 .btn-one-end {
-  @apply w-40 border border-one-primary text-one-white px-4 py-2 rounded-lg;
+  @apply w-40 text-one-white px-4 py-2 rounded-lg hover:underline;
 }
 
 .btn-one-reply {

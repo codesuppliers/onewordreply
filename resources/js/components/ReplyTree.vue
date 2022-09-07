@@ -7,14 +7,17 @@
         : bgColorFlipped
     "
   >
-    <div class="flex text-one-gray space-x-2">
+    <div
+      class="flex text-one-gray space-x-2"
+      :class="reply.replyParent !== null ? 'pt-4' : ''"
+    >
       <span class="font-bold text-sm text-one-secondary">{{ reply.name }}</span>
       <span class="text-xs">•</span>
       <span class="text-sm">{{ reply.when }}</span>
-      <span class="text-xs">•</span>
+      <!-- <span class="text-xs">•</span> -->
     </div>
 
-    <div class="pl-2 w-full border-l-2 border-one-gray mt-2 pb-4 text-sm">
+    <div class="pl-2 w-full border-l-2 border-one-gray mt-2 text-sm">
       <span>{{ reply.reply }}</span>
       <Button
         type="reply"

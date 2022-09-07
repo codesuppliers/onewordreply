@@ -200,6 +200,20 @@ const replies = {
       replyParent: 2,
       when: 'less than a minute ago',
     },
+    {
+      id: 6,
+      name: 'Acme Inc',
+      reply: 'No',
+      replyParent: 1,
+      when: 'less than a minute ago',
+    },
+    {
+      id: 7,
+      name: 'Beta Inc',
+      reply: 'No',
+      replyParent: null,
+      when: 'less than a minute ago',
+    },
   ],
 };
 
