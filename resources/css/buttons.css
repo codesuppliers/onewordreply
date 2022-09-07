@@ -1,3 +1,15 @@
 .btn-one-ask {
   @apply w-40 bg-one-secondary text-one-black px-4 py-2 rounded-lg;
 }
+
+.btn-one-support {
+  @apply w-40 border border-one-secondary text-one-white px-4 py-2 rounded-lg;
+}
+
+.btn-one-end {
+  @apply w-40 border border-one-primary text-one-white px-4 py-2 rounded-lg;
+}
+
+.btn-one-reply {
+  @apply text-one-gray text-xs;
+}

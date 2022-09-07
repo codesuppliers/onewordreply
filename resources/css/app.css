@@ -1,5 +1,6 @@
 @import 'colors.css';
 @import 'buttons.css';
+@import 'scrollbar.css';
 
 @tailwind base;
 @tailwind components;

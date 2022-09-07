@@ -3,10 +3,14 @@
     <div
       class="flex md:hidden w-full items-center justify-center space-x-4 pt-4"
     >
-      <div class="w-40">
-        <div class="bg-pink-300 px-4 py-2 rounded-lg">social</div>
+      <div class="w-fit">
+        <div class="py-2 rounded-lg">
+          <Button type="support" :onClick="supportUs" lIcon="IconDollar">
+            Support us
+          </Button>
+        </div>
       </div>
-      <div class="w-40">
+      <div class="w-fit">
         <Button type="ask" :onClick="askQuestion" lIcon="IconPlus">
           Ask question
         </Button>
@@ -14,8 +18,10 @@
     </div>
     <div class="w-full h-16 flex justify-between pt-4 items-center">
       <div class="ml-4 w-40">
-        <div class="hidden md:flex bg-pink-300 px-4 py-2 rounded-lg">
-          social
+        <div class="hidden md:flex px-4 py-2 rounded-lg">
+          <Button type="support" :onClick="supportUs" lIcon="IconDollar">
+            Support us
+          </Button>
         </div>
       </div>
       <h1 class="text-4xl font-bold">OneWordReply</h1>
@@ -54,6 +60,9 @@ export default {
   methods: {
     askQuestion() {
       this.$router.push('/ask');
+    },
+    supportUs() {
+      window.location.href = 'https://github.com/sponsors/codesuppliers';
     },
   },
 };

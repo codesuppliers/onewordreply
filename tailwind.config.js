@@ -16,7 +16,9 @@ module.exports = {
         one: {
           white: 'var(--white)',
           black: 'var(--black)',
+          gray: 'var(--gray)',
           primary: 'var(--primary)',
+          primaryDark: 'var(--primary-dark)',
           secondary: 'var(--secondary)',
           background: 'var(--background)',
         },

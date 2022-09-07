@@ -11,9 +11,17 @@
       <div class="flex flex-col justify-center h-full">
         <div class="flex items-center">
           <SvgIcon :name="icon" v-if="icon" />
-          <SvgIcon :name="lIcon" v-if="lIcon" class="mr-2" />
+          <SvgIcon
+            :name="lIcon"
+            v-if="lIcon"
+            :class="type !== 'reply' ? 'mr-2' : 'mr-1'"
+          />
           <slot></slot>
-          <SvgIcon :name="rIcon" v-if="rIcon" class="ml-2" />
+          <SvgIcon
+            :name="rIcon"
+            v-if="rIcon"
+            :class="type !== 'reply' ? 'ml-2' : 'ml-1'"
+          />
         </div>
       </div>
     </button>
