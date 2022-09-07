@@ -9,6 +9,6 @@ class QuestionController extends Controller
 {
     public function index()
     {
-        return QuestionResource::collection(Question::latest()->paginate(10));
+        return QuestionResource::collection(Question::orderByDesc('id')->paginate(10));
     }
 }
