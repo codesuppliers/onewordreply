@@ -1,0 +1,3 @@
+.btn-one-ask {
+  @apply w-40 bg-one-secondary text-one-black px-4 py-2 rounded-lg;
+}
