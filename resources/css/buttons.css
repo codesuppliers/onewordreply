@@ -10,6 +10,14 @@
   @apply w-40 text-one-white px-4 py-2 rounded-lg hover:underline;
 }
 
+.btn-one-scrollfor {
+  @apply w-40 text-one-white px-4 py-2 rounded-lg;
+}
+
 .btn-one-reply {
-  @apply text-one-gray text-xs;
+  @apply text-one-gray text-xs hover:text-one-white;
+}
+
+.btn-one-replyBtn {
+  @apply w-28 bg-one-secondary text-one-black px-4 py-2 rounded-lg;
 }

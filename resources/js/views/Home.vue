@@ -15,7 +15,9 @@
       </div>
     </div>
     <div class="w-full flex justify-center mb-8" v-if="!isEndOfQuestions">
-      <span class="flex justify-center btn-one-end">Scroll for more!</span>
+      <span class="flex justify-center btn-one-scrollfor"
+        >Scroll for more!</span
+      >
     </div>
     <div class="w-full flex justify-center mb-8" v-if="isEndOfQuestions">
       <Button type="end" :onClick="scrollTop">That's All Folks!</Button>
@@ -37,11 +39,11 @@ export default {
   data() {
     return {
       questions: [],
-      scrollCount: 0,
       scrollListener: null,
-      isEndOfQuestions: true,
+      isEndOfQuestions: false,
       openedId: null,
       replies: [],
+      nextUrl: null,
     };
   },
   methods: {
@@ -53,70 +55,72 @@ export default {
         window.innerHeight + window.pageYOffset >= document.body.offsetHeight;
 
       if (endOfPage) {
-        this.scrollCount++;
-        API.getQuestions(this.scrollCount)
-          .then((response) => {
-            this.questions = this.questions.concat(response.data);
-            this.isEndOfQuestions = false;
-          })
-          .catch((error) => {
-            this.scrollCount--;
-            this.isEndOfQuestions = true;
-          });
+        if (this.nextUrl) {
+          API.getQuestions(this.nextUrl)
+            .then((response) => {
+              this.questions = this.questions.concat(response.data.data);
+              this.nextUrl = response.data.links.next;
+              this.isEndOfQuestions = false;
+            })
+            .catch((error) => {
+              this.isEndOfQuestions = true;
+            });
+        } else {
+          console.log('end of page');
+          this.isEndOfQuestions = true;
+        }
       }
     },
     loadReplies(questionId) {
       API.getReplies(questionId)
         .then((response) => {
-          console.log(response.data);
-          this.openedId = questionId;
-          this.replies = this.listToTree(response.data);
+          if (this.openedId === questionId) {
+            this.openedId = null;
+            this.replies = [];
+          } else {
+            this.openedId = questionId;
+            this.replies = this.listToTree(response.data.data);
+          }
         })
         .catch((error) => {
           console.log(error);
         });
     },
-    listToTree(data, options) {
-      options = options || {};
-      var ID_KEY = options.idKey || 'id';
-      var PARENT_KEY = options.parentKey || 'replyParent';
-      var CHILDREN_KEY = options.childrenKey || 'Items';
-
-      var item, id, parentId;
-      var map = {};
-      for (var i = 0; i < data.length; i++) {
-        if (data[i][ID_KEY]) {
-          map[data[i][ID_KEY]] = data[i];
-          data[i][CHILDREN_KEY] = [];
+    listToTree(arr) {
+      var map = {},
+        node,
+        roots = [],
+        i;
+      for (i = 0; i < arr.length; i += 1) {
+        map[arr[i].id] = i;
+        arr[i].Items = [];
+      }
+      for (i = 0; i < arr.length; i += 1) {
+        node = arr[i];
+        if (node.reply_parent !== null) {
+          arr[map[node.reply_parent]].Items.push(node);
+        } else {
+          roots.push(node);
         }
       }
-      for (var i = 0; i < data.length; i++) {
-        if (data[i][PARENT_KEY]) {
-          if (map[data[i][PARENT_KEY]]) {
-            map[data[i][PARENT_KEY]][CHILDREN_KEY].push(data[i]);
-            data.splice(i, 1);
-            i--;
-          } else {
-            data[i][PARENT_KEY] = 0;
-          }
-        }
-      }
-      return data;
+      return roots;
     },
   },
   created() {
-    this.scrollCount++;
-    API.getQuestions(this.scrollCount)
+    API.getQuestions('/api/questions')
       .then((response) => {
-        this.questions = this.questions.concat(response.data);
+        this.questions = this.questions.concat(response.data.data);
+        this.nextUrl = response.data.links.next;
+
+        this.scrollListener = window.addEventListener(
+          'scroll',
+          this.isEndOfPage
+        );
+        this.isEndOfPage();
       })
       .catch((error) => {
         this.isEndOfQuestions = true;
       });
-
-    this.scrollListener = window.addEventListener('scroll', this.isEndOfPage);
-
-    this.isEndOfPage();
   },
   beforeDestroy() {
     window.removeEventListener('scroll', this.isEndOfPage);
