@@ -86,32 +86,24 @@ export default {
           console.log(error);
         });
     },
-    listToTree(data, options) {
-      options = options || {};
-      var ID_KEY = options.idKey || 'id';
-      var PARENT_KEY = options.parentKey || 'reply_parent';
-      var CHILDREN_KEY = options.childrenKey || 'Items';
-
-      var item, id, parentId;
-      var map = {};
-      for (var i = 0; i < data.length; i++) {
-        if (data[i][ID_KEY]) {
-          map[data[i][ID_KEY]] = data[i];
-          data[i][CHILDREN_KEY] = [];
+    listToTree(arr) {
+      var map = {},
+        node,
+        roots = [],
+        i;
+      for (i = 0; i < arr.length; i += 1) {
+        map[arr[i].id] = i;
+        arr[i].Items = [];
+      }
+      for (i = 0; i < arr.length; i += 1) {
+        node = arr[i];
+        if (node.reply_parent !== null) {
+          arr[map[node.reply_parent]].Items.push(node);
+        } else {
+          roots.push(node);
         }
       }
-      for (var i = 0; i < data.length; i++) {
-        if (data[i][PARENT_KEY]) {
-          if (map[data[i][PARENT_KEY]]) {
-            map[data[i][PARENT_KEY]][CHILDREN_KEY].push(data[i]);
-            data.splice(i, 1);
-            i--;
-          } else {
-            data[i][PARENT_KEY] = 0;
-          }
-        }
-      }
-      return data;
+      return roots;
     },
   },
   created() {

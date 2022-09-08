@@ -6,7 +6,7 @@
         type +
         (w ? ' ' + w : '')
       "
-      @click="onClick(value)"
+      @click.stop="onClick(value)"
     >
       <div class="flex flex-col justify-center h-full">
         <div class="flex items-center">
