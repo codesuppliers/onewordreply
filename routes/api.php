@@ -16,4 +16,6 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/questions', [QuestionController::class, 'index']);
+Route::post('/questions', [QuestionController::class, 'store']);
 Route::get('/replies/{question}', [ReplyController::class, 'index']);
+Route::post('/replies/{question}', [ReplyController::class, 'store']);
