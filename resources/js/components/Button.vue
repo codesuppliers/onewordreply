@@ -2,13 +2,14 @@
   <div :class="w ? w : ''">
     <button
       :class="
-        'flex justify-center whitespace-nowrap btn-one-' +
+        'flex justify-center whitespace-nowrap disabled:opacity-40 btn-one-' +
         type +
         (w ? ' ' + w : '')
       "
       @click.stop="onClick(value)"
+      :disabled="disabled"
     >
-      <div class="flex flex-col justify-center h-full">
+      <div class="flex flex-col justify-center h-full" v-if="!isWaiting">
         <div class="flex items-center">
           <SvgIcon :name="icon" v-if="icon" />
           <SvgIcon
@@ -23,6 +24,10 @@
             :class="type !== 'reply' ? 'ml-2' : 'ml-1'"
           />
         </div>
+      </div>
+      <div role="status" v-if="isWaiting">
+        <SvgIcon name="IconLoading" />
+        <span class="sr-only">Loading...</span>
       </div>
     </button>
   </div>
@@ -57,6 +62,14 @@ export default {
     },
     w: {
       type: String,
+    },
+    isWaiting: {
+      type: Boolean,
+      default: false,
+    },
+    disabled: {
+      type: Boolean,
+      default: false,
     },
   },
   components: {

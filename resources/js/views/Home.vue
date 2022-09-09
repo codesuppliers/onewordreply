@@ -11,6 +11,8 @@
           :value="question.id"
           :replies="replies"
           :opened="question.id === openedId"
+          @addedReply="addedReply"
+          @addedSubReply="addedSubReply"
         />
       </div>
     </div>
@@ -43,12 +45,22 @@ export default {
       isEndOfQuestions: false,
       openedId: null,
       replies: [],
+      rawReplies: [],
       nextUrl: null,
     };
   },
   methods: {
     scrollTop() {
       window.scrollTo({ top: 0, behavior: 'smooth' });
+    },
+    addedReply(reply) {
+      this.replies.push(reply);
+    },
+    addedSubReply(reply) {
+      reply.Items = [];
+
+      this.rawReplies.push(reply);
+      this.replies = this.listToTree(this.rawReplies);
     },
     isEndOfPage() {
       const endOfPage =
@@ -66,7 +78,6 @@ export default {
               this.isEndOfQuestions = true;
             });
         } else {
-          console.log('end of page');
           this.isEndOfQuestions = true;
         }
       }
@@ -79,6 +90,7 @@ export default {
             this.replies = [];
           } else {
             this.openedId = questionId;
+            this.rawReplies = response.data.data;
             this.replies = this.listToTree(response.data.data);
           }
         })

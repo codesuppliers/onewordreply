@@ -28,40 +28,34 @@
     </div>
 
     <div class="flex space-x-2 mt-4 mb-4" v-if="openReply">
-      <div class="grow">
-        <input
-          class="w-full h-full rounded-lg px-4 items-center"
-          :class="bgColor + (error ? ' border-2 border-red-500' : '')"
-          type="text"
-          placeholder="Write your reply in one word..."
-          v-model="replyContent"
-          maxlength="30"
-          @click.stop
-        />
-      </div>
-      <Button
-        type="replyBtn"
+      <ReplyField
+        :bgColor="bgColor"
         :onClick="replySend"
-        lIcon="IconReplyBtn"
-        class="hidden md:flex"
+        :error="error"
         :value="reply.id"
-      >
-        Reply
-      </Button>
+        :isWaiting="isWaiting"
+        :disabled="error.length !== 0 || isWaiting"
+        :onChange="replyFieldOnChange"
+        :replyContent="replyContent"
+      />
     </div>
     <div v-if="hasChildren">
       <ReplyTree
         v-for="rep in reply.Items"
         :key="rep.id"
         :reply="rep"
-        class="pl-4"
+        :bgColor="bgColor"
+        class=""
+        @addedSubReply="addedSubReply"
       />
     </div>
   </div>
 </template>
 
 <script>
+import ReplyField from '@/components/ReplyField.vue';
 import Button from '@/components/Button.vue';
+import API from '@/api';
 
 export default {
   name: 'ReplyTree',
@@ -72,11 +66,12 @@ export default {
     },
     bgColor: {
       type: String,
-      default: 'bg-one-primary',
+      required: true,
     },
   },
   components: {
     Button,
+    ReplyField,
   },
   computed: {
     hasChildren() {
@@ -89,28 +84,53 @@ export default {
       replyContent: '',
       openReply: false,
       error: '',
+      isWaiting: false,
     };
   },
   methods: {
+    replyFieldOnChange(reply) {
+      this.replyContent = reply;
+    },
     openReplyF() {
       this.openReply = !this.openReply;
       this.replyContent = '';
       this.error = '';
     },
+    addedSubReply(res) {
+      this.$emit('addedSubReply', res);
+    },
     replySend(id) {
-      if (this.error == '' && this.replyContent != '') {
-        console.log(this.reply);
-        console.log(this.reply.questionId, id);
+      if (this.error == '' && this.reply != '') {
+        this.isWaiting = true;
+
+        API.postReply(this.reply.question_id, {
+          content: this.replyContent,
+          reply_id: id,
+        })
+          .then((res) => {
+            this.isWaiting = false;
+            this.replyContent = '';
+            this.error = '';
+            this.openReply = !this.openReply;
+
+            this.$emit('addedSubReply', res.data.data);
+          })
+          .catch((err) => {
+            this.error = 'Something went wrong';
+          });
+
         this.error = '';
       } else {
-        console.log('Error');
         this.error = 'Enter only one word!';
       }
     },
   },
   watch: {
     replyContent() {
-      if (!RegExp(/^\b[a-zA-Z0-9_]+\b$/).test(this.replyContent)) {
+      if (
+        this.replyContent &&
+        !RegExp(/^\b[a-zA-Z0-9_]+\b$/).test(this.replyContent)
+      ) {
         this.error = 'Enter only one word!';
       } else {
         this.error = '';

@@ -2,9 +2,8 @@
   <div
     class="flex flex-col p-4 rounded-lg w-full sm:w-3/4 lg:w-1/2 md:transition-all lg:transition-all transition-all cursor-pointer h-fit"
     :class="bgColor"
-    @click="emOnC"
   >
-    <div class="flex">
+    <div class="flex" @click="emOnC">
       <div class="flex flex-col grow">
         <span class="font-bold grow">{{ question.content }}</span>
         <span class="text-sm" :class="opened ? 'mb-4' : ''">{{
@@ -24,26 +23,16 @@
       :class="replies.length > 0 ? 'mb-4' : ''"
       v-if="opened"
     >
-      <div class="grow">
-        <input
-          class="w-full h-full rounded-lg px-4 items-center"
-          :class="bgColorFlipped + (error ? ' border-2 border-red-500' : '')"
-          type="text"
-          placeholder="Write your reply in one word..."
-          v-model="reply"
-          maxlength="30"
-          @click.stop
-        />
-      </div>
-      <Button
-        type="replyBtn"
+      <ReplyField
+        :bgColor="bgColorFlipped"
         :onClick="replyQuestion"
-        lIcon="IconReplyBtn"
-        class="hidden md:flex"
+        :error="error"
         :value="question.id"
-      >
-        Reply
-      </Button>
+        :isWaiting="isWaiting"
+        :disabled="error.length !== 0 || isWaiting"
+        :onChange="replyFieldOnChange"
+        :replyContent="reply"
+      />
     </div>
     <div class="flex flex-col" v-if="opened">
       <ReplyTree
@@ -53,14 +42,17 @@
         :bgColor="bgColor"
         class="p-4 rounded-lg mb-4"
         :class="bgColorFlipped"
+        @addedSubReply="addedSubReply"
       />
     </div>
   </div>
 </template>
 
 <script>
+import ReplyField from '@/components/ReplyField.vue';
 import ReplyTree from '@/components/ReplyTree.vue';
 import Button from '@/components/Button.vue';
+import API from '@/api';
 
 export default {
   name: 'QuestionCard',
@@ -93,6 +85,7 @@ export default {
   components: {
     ReplyTree,
     Button,
+    ReplyField,
   },
   data() {
     return {
@@ -102,32 +95,48 @@ export default {
           ? 'bg-one-primaryDark'
           : 'bg-one-primary',
       error: '',
+      isWaiting: false,
     };
   },
   methods: {
+    replyFieldOnChange(reply) {
+      this.reply = reply;
+    },
+
     emOnC() {
       this.onClick(this.value);
 
       this.reply = '';
       this.error = '';
     },
+    addedSubReply(res) {
+      this.$emit('addedSubReply', res);
+    },
     replyQuestion(questionId) {
       if (this.error == '' && this.reply != '') {
-        console.log({
-          question_id: questionId,
-          reply_id: null,
-          content: this.reply,
-        });
+        this.isWaiting = true;
+
+        API.postReply(questionId, { content: this.reply, reply_id: null })
+          .then((res) => {
+            this.isWaiting = false;
+            this.reply = '';
+            this.error = '';
+
+            this.$emit('addedReply', res.data.data);
+          })
+          .catch((err) => {
+            this.error = 'Something went wrong';
+          });
+
         this.error = '';
       } else {
         this.error = 'Enter only one word!';
-        console.log('Error');
       }
     },
   },
   watch: {
     reply() {
-      if (!RegExp(/^\b[a-zA-Z0-9_]+\b$/).test(this.reply)) {
+      if (this.reply && !RegExp(/^\b[a-zA-Z0-9_]+\b$/).test(this.reply)) {
         this.error = 'Enter only one word!';
       } else {
         this.error = '';
