@@ -19,11 +19,11 @@ class CreateGuestUser
 
     private function getRandomUser()
     {
-        $response = json_decode(file_get_contents('https://randomuser.me/api/?inc=name,email&nat=us'), true);
+        $faker = \Faker\Factory::create();
 
         return [
-            'name' => $response['results'][0]['name']['first'],
-            'email' => $response['results'][0]['email'],
+            'name' => $faker->firstName(),
+            'email' => $faker->safeEmail(),
             'password' => 'password',
         ];
     }
