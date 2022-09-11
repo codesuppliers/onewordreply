@@ -11,12 +11,18 @@
         />
       </div>
     </div>
-    <div class="w-full flex justify-center mb-8" v-if="!isEndOfQuestions">
+    <div
+      class="w-full flex justify-center mb-8"
+      v-if="!isEndOfQuestions && !loadingQuestions"
+    >
       <span class="flex justify-center btn-one-scrollfor"
         >Scroll for more!</span
       >
     </div>
-    <div class="w-full flex justify-center mb-8" v-if="isEndOfQuestions">
+    <div
+      class="w-full flex justify-center mb-8"
+      v-if="isEndOfQuestions && !loadingQuestions"
+    >
       <Button type="end" :onClick="scrollTop">That's All Folks!</Button>
     </div>
   </div>
@@ -39,6 +45,7 @@ export default {
       scrollListener: null,
       isEndOfQuestions: false,
       isWaitingQuestions: false,
+      loadingQuestions: true,
 
       nextUrl: null,
     };
@@ -80,6 +87,8 @@ export default {
           this.isEndOfPage
         );
         this.isEndOfPage();
+
+        this.loadingQuestions = false;
       })
       .catch((error) => {
         this.isEndOfQuestions = true;

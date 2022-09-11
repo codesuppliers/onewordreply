@@ -139,7 +139,7 @@ export default {
       for (i = 0; i < arr.length; i += 1) {
         node = arr[i];
         if (node.reply_parent !== null) {
-          console.log(arr);
+          //console.log(arr);
           arr[map[node.reply_parent]].Items.push(node);
         } else {
           roots.push(node);
