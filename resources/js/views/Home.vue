@@ -54,7 +54,8 @@ export default {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     },
     addedReply(reply) {
-      this.replies.push(reply);
+      this.rawReplies.push(reply);
+      this.replies = this.listToTree(this.rawReplies);
     },
     addedSubReply(reply) {
       reply.Items = [];
@@ -110,6 +111,7 @@ export default {
       for (i = 0; i < arr.length; i += 1) {
         node = arr[i];
         if (node.reply_parent !== null) {
+          console.log(arr);
           arr[map[node.reply_parent]].Items.push(node);
         } else {
           roots.push(node);
