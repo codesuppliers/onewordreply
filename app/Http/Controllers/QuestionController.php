@@ -16,7 +16,6 @@ class QuestionController extends Controller
     public function store(CreateGuestUser $createRandomUser)
     {
         request()->validate([
-            'description' => 'required',
             'content' => 'required',
         ]);
 
