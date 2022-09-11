@@ -1,6 +1,6 @@
 <template>
   <div
-    class="flex flex-col p-4 rounded-lg w-full sm:w-3/4 lg:w-1/2 md:transition-all lg:transition-all transition-all cursor-pointer h-fit"
+    class="flex flex-col p-4 rounded-lg w-full sm:w-3/4 lg:w-2/3 md:transition-all lg:transition-all transition-all cursor-pointer h-fit max-w-6xl"
     :class="bgColor"
   >
     <div class="flex" @click="emOnC">

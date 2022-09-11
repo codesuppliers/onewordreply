@@ -15,7 +15,7 @@
     type="replyBtn"
     :onClick="onClick"
     lIcon="IconReplyBtn"
-    class="hidden md:flex"
+    class=""
     :value="value"
     :isWaiting="isWaiting"
     :disabled="disabled"
