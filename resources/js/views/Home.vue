@@ -7,12 +7,7 @@
           :key="question.id"
           :question="question"
           :bgColor="index % 2 == 0 ? 'bg-one-primary' : 'bg-one-primaryDark'"
-          :onClick="loadReplies"
           :value="question.id"
-          :replies="replies"
-          :opened="question.id === openedId"
-          @addedReply="addedReply"
-          @addedSubReply="addedSubReply"
         />
       </div>
     </div>
@@ -43,9 +38,8 @@ export default {
       questions: [],
       scrollListener: null,
       isEndOfQuestions: false,
-      openedId: null,
-      replies: [],
-      rawReplies: [],
+      isWaitingQuestions: false,
+
       nextUrl: null,
     };
   },
@@ -53,16 +47,7 @@ export default {
     scrollTop() {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     },
-    addedReply(reply) {
-      this.rawReplies.push(reply);
-      this.replies = this.listToTree(this.rawReplies);
-    },
-    addedSubReply(reply) {
-      reply.Items = [];
 
-      this.rawReplies.push(reply);
-      this.replies = this.listToTree(this.rawReplies);
-    },
     isEndOfPage() {
       const endOfPage =
         window.innerHeight + window.pageYOffset >= document.body.offsetHeight;
@@ -82,42 +67,6 @@ export default {
           this.isEndOfQuestions = true;
         }
       }
-    },
-    loadReplies(questionId) {
-      API.getReplies(questionId)
-        .then((response) => {
-          if (this.openedId === questionId) {
-            this.openedId = null;
-            this.replies = [];
-          } else {
-            this.openedId = questionId;
-            this.rawReplies = response.data.data;
-            this.replies = this.listToTree(response.data.data);
-          }
-        })
-        .catch((error) => {
-          console.log(error);
-        });
-    },
-    listToTree(arr) {
-      var map = {},
-        node,
-        roots = [],
-        i;
-      for (i = 0; i < arr.length; i += 1) {
-        map[arr[i].id] = i;
-        arr[i].Items = [];
-      }
-      for (i = 0; i < arr.length; i += 1) {
-        node = arr[i];
-        if (node.reply_parent !== null) {
-          console.log(arr);
-          arr[map[node.reply_parent]].Items.push(node);
-        } else {
-          roots.push(node);
-        }
-      }
-      return roots;
     },
   },
   created() {

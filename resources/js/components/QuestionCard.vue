@@ -34,16 +34,27 @@
         :replyContent="reply"
       />
     </div>
-    <div class="flex flex-col" v-if="opened">
-      <ReplyTree
-        v-for="reply in replies"
-        :key="reply.id"
-        :reply="reply"
-        :bgColor="bgColor"
-        class="p-4 rounded-lg mb-4"
-        :class="bgColorFlipped"
-        @addedSubReply="addedSubReply"
-      />
+    <div class="flex flex-col w-full" v-if="opened">
+      <div
+        role="status"
+        v-if="isWaitingReplies"
+        class="flex w-full justify-center my-4"
+      >
+        <SvgIcon name="IconLoading" />
+        <span class="sr-only">Loading...</span>
+      </div>
+
+      <div v-if="!isWaitingReplies">
+        <ReplyTree
+          v-for="reply in replies"
+          :key="reply.id"
+          :reply="reply"
+          :bgColor="bgColor"
+          class="p-4 rounded-lg mb-4"
+          :class="bgColorFlipped"
+          @addedSubReply="addedSubReply"
+        />
+      </div>
     </div>
   </div>
 </template>
@@ -53,6 +64,7 @@ import ReplyField from '@/components/ReplyField.vue';
 import ReplyTree from '@/components/ReplyTree.vue';
 import Button from '@/components/Button.vue';
 import API from '@/api';
+import SvgIcon from '@/components/essentials/SvgIcon.vue';
 
 export default {
   name: 'QuestionCard',
@@ -65,27 +77,16 @@ export default {
       type: String,
       default: 'bg-one-primary',
     },
-    onClick: {
-      type: Function,
-      required: true,
-    },
     value: {
       type: Number,
       required: true,
-    },
-    replies: {
-      type: Array,
-      default: [],
-    },
-    opened: {
-      type: Boolean,
-      default: false,
     },
   },
   components: {
     ReplyTree,
     Button,
     ReplyField,
+    SvgIcon,
   },
   data() {
     return {
@@ -96,21 +97,66 @@ export default {
           : 'bg-one-primary',
       error: '',
       isWaiting: false,
+      isWaitingReplies: false,
+      replies: [],
+      rawReplies: [],
+      opened: false,
     };
   },
   methods: {
+    addedReply(reply) {
+      this.rawReplies.push(reply);
+      this.replies = this.listToTree(this.rawReplies);
+    },
+    addedSubReply(reply) {
+      reply.Items = [];
+
+      this.rawReplies.push(reply);
+      this.replies = this.listToTree(this.rawReplies);
+    },
+    loadReplies(questionId) {
+      this.isWaitingReplies = true;
+
+      API.getReplies(questionId)
+        .then((response) => {
+          this.rawReplies = response.data.data;
+          this.replies = this.listToTree(response.data.data);
+          this.isWaitingReplies = false;
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    },
+    listToTree(arr) {
+      var map = {},
+        node,
+        roots = [],
+        i;
+      for (i = 0; i < arr.length; i += 1) {
+        map[arr[i].id] = i;
+        arr[i].Items = [];
+      }
+      for (i = 0; i < arr.length; i += 1) {
+        node = arr[i];
+        if (node.reply_parent !== null) {
+          console.log(arr);
+          arr[map[node.reply_parent]].Items.push(node);
+        } else {
+          roots.push(node);
+        }
+      }
+      return roots;
+    },
+
     replyFieldOnChange(reply) {
       this.reply = reply;
     },
 
     emOnC() {
-      this.onClick(this.value);
+      this.opened = !this.opened;
 
       this.reply = '';
       this.error = '';
-    },
-    addedSubReply(res) {
-      this.$emit('addedSubReply', res);
     },
     replyQuestion(questionId) {
       if (this.error == '' && this.reply != '') {
@@ -122,7 +168,7 @@ export default {
             this.reply = '';
             this.error = '';
 
-            this.$emit('addedReply', res.data.data);
+            this.addedReply(res.data.data);
           })
           .catch((err) => {
             this.error = 'Something went wrong';
@@ -140,6 +186,11 @@ export default {
         this.error = 'Enter only one word!';
       } else {
         this.error = '';
+      }
+    },
+    opened() {
+      if (this.opened) {
+        this.loadReplies(this.question.id);
       }
     },
   },
