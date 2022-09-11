@@ -4,11 +4,18 @@
     :class="bgColor"
   >
     <div class="flex" @click="emOnC">
-      <div class="flex flex-col grow">
-        <span class="font-bold grow">{{ question.content }}</span>
-        <span class="text-sm" :class="opened ? 'mb-4' : ''">{{
-          question.description
-        }}</span>
+      <div class="flex flex-col grow justify-center">
+        <span
+          class="font-bold"
+          :class="!question.description && opened ? 'pb-4' : ''"
+          >{{ question.content }}</span
+        >
+        <span
+          class="text-sm"
+          :class="opened ? 'mb-4' : ''"
+          v-if="question.description"
+          >{{ question.description }}</span
+        >
       </div>
 
       <div class="flex flex-col items-end">
@@ -42,6 +49,13 @@
       >
         <SvgIcon name="IconLoading" />
         <span class="sr-only">Loading...</span>
+      </div>
+
+      <div
+        class="flex w-full justify-center mt-4"
+        v-if="rawReplies.length == 0 && !isWaitingReplies"
+      >
+        <span>No replies yet!</span>
       </div>
 
       <div v-if="!isWaitingReplies">
